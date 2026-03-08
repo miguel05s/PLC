@@ -1,54 +1,61 @@
-# Pascal para VM
+# Pascal Compiler
 
-Compilador em Python (PLY) que traduz um subconjunto de Pascal para a VM fornecida no enunciado.
+**Processamento de Linguagens e Compiladores** · Licenciatura em Ciências da Computação · Universidade do Minho · 2025/2026
 
-## Uso
+---
 
-Instalação de dependências:
+## Descrição
+
+Compilador para um subconjunto da linguagem Pascal Standard, desenvolvido no âmbito da unidade curricular de Processamento de Linguagens e Compiladores. O sistema traduz código-fonte Pascal para instruções de uma máquina virtual baseada em pilha, implementando todas as fases essenciais de compilação.
+
+## Estrutura do Projeto
 
 ```
+src/
+├── lexer.py        # Analisador léxico (tokenização via PLY)
+├── parser.py       # Analisador sintático (construção da AST via PLY)
+├── ast.py          # Definição dos nós da árvore sintática abstrata
+├── sema.py         # Analisador semântico e tabela de símbolos
+├── codegen_vm.py   # Gerador de código assembly para a VM
+└── main.py         # Interface de linha de comandos
+```
+
+## Funcionalidades
+
+- Tipos de dados: `integer`, `real`, `boolean`, `string` e arrays unidimensionais
+- Operações aritméticas, relacionais e lógicas
+- Estruturas de controlo: `if-then-else`, `while-do`, `for-to/downto`, `repeat-until`
+- Subprogramas: procedimentos e funções com parâmetros por valor
+- Operações de entrada/saída: `readln` e `writeln`
+- Função built-in `length` para strings
+- Análise semântica com verificação de tipos e gestão de escopos
+- Persistência da AST para depuração
+
+## Pipeline de Compilação
+
+```
+Código Pascal → [Lexer] → Tokens → [Parser] → AST
+              → [Analyzer] → AST verificada → [CodeGen] → Código VM
+```
+
+## Execução
+
+```bash
 pip install ply
+python main.py <ficheiro.pas>
 ```
 
-Compilar:
+O compilador produz um ficheiro `.vm` com o código assembly gerado, pronto a executar na máquina virtual fornecida.
 
-```
-python -m src.main tests/entrada.pas -o examples/saida.vm
-```
+## Tecnologias
 
+- Python 3.x
+- PLY (Python Lex-Yacc) 3.11
+- Máquina virtual baseada em pilha (fornecida)
 
-## Subconjunto suportado
-- Tipos: integer, real, boolean, string; arrays 1D com limites inteiros constantes.
-- Controlo: if/else, while, repeat/until, for to/downto.
-- I/O: readln (variáveis e elementos de array), writeln (expressões), writes implícito via múltiplos args.
-- Expressões: +, -, *, /, div, mod, and, or, not, comparações. Concatenação de strings com `+`. `length(s)` e indexação de string `s[i]` (i é 1-based em Pascal, convertido para 0-based na VM).
-- Subprogramas: procedure e function sem parâmetros `var`; parâmetros por valor; locais; funções retornam via slot local 1 e também deixam o valor no topo antes de RETURN.
+## Autores
 
-## Convenção de chamada (VM)
-- Argumentos: offsets negativos relativizados a `fp`. Último argumento em `PUSHL -1`, penúltimo em `PUSHL -2`, etc. Caller empilha argumentos na ordem escrita e faz `PUSHA FNname` + `CALL`.
-- Locais: offsets positivos a partir de 1. Reservamos espaço com `PUSHN k` no prólogo do subprograma.
-- Retorno de função: armazenado em `STOREL 1` e também deixado no topo antes de `RETURN` para o caller consumir.
-- Globals: guardados em `gp`; `PUSHG/STOREG` com offsets atribuídos pelo compilador.
-
-## Limitações conhecidas
-- Sem parâmetros `var`, sem records, sem arrays multidimensionais, sem `case`.
-- Não há verificações de bounds em arrays/strings (sem `CHECK`).
-- Sem otimizações.
-
-## Exemplos
-Fontes Pascal em `tests/`:
-- `tests/hello.pas`
-- `tests/fatorial.pas`
-- `tests/primo.pas`
-- `tests/soma_array.pas`
-- `tests/binario.pas`
-
-Para gerar cada `.vm` :
-
-- `python -m src.main tests/hello.pas -o examples/hello.vm`
-- `python -m src.main tests/fatorial.pas -o examples/fatorial.vm`
-- `python -m src.main tests/primo.pas -o examples/primo.vm`
-- `python -m src.main tests/soma_array.pas -o examples/soma_array.vm`
-- `python -m src.main tests/binario.pas -o examples/binario.vm`
+Miguel Silva — A109069  
+Tiago Fernandes — A98983
 
 
